@@ -112,7 +112,7 @@ var menu_bar = {
 		this.bar = $('<div id="ui_menu_bar"></div>').append(this.items);
 		this.bar.toggle(storage.get('ui_menu_visible') == 'true' || false);
 		//append basic elems
-		this.append($('<strong>Godville UI (v.0.0.4):</strong>'));
+		this.append($('<strong>Godville UI:</strong>'));
 		this.append(this.reformalLink);
 		if (is_developer()) {
 			this.append(this.getDumpButton());
@@ -252,7 +252,7 @@ var stats = {
 	setFromLabelCounter: function(id, $container, label, parser) {
 		parser = parser || parseInt;
 		var $label = findLabel($container, label);
-		var $field = $label.siblings('.field_content');
+		var $field = $label.next('.field_content');
 		var value = parser($field.text());
 
 		return this.set(id, value);
