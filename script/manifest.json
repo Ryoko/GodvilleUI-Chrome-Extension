@@ -7,13 +7,13 @@
    
    "description": "Some improvements for godville ui",
    "name": "godville-ui",
-   "version": "0.0.2",
+   "version": "0.0.4",
    "icons": {
    	"128": "logo128.png",
    	"16": "logo16.png",
    	"32": "logo32.png",
    	"48": "logo48.png"
    },
-   "update_url": "http://geliktit.net/files/gceUpdate.xml"
-
+   "update_url": "http://geliktit.net/files/gceUpdate.xml",
+   "options_page": "options.html"
 }
