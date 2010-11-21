@@ -2,6 +2,11 @@ var sects = ['heal', 'pray', 'sacrifice', 'exp', 'gold', 'hit', 'do_task', 'canc
 var def;
 
 function setForm(){
+    for (var i = 0; i < sects.length; i++){
+        var t = sects[i];
+        var $el = $('span#l_'+t);
+        $el.click(function(){setText(t)})
+    }
     var $bt1 = $('form#words');
     var $bt2 = $('form#main_set');
     $bt1.submit(function(){ save_options(1); });
@@ -25,12 +30,13 @@ function save_options(form) {
 }
 
 function setText(element_name){
-    var $elem = $('textarea#' + element_name);
+    var $elem = $('textarea#ta_edit');
     var text = localStorage[element_name].split("||");
     if (!text || text.length == 0 || text[0] == "")
         text = def['phrases'][element_name];
     $elem.attr('rows', text.length);
     $elem.text(text.join("\n"));
+    $('label#ta_name').text(element_name);
 }
 
 function getText(element_name){
