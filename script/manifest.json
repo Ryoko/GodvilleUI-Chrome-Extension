@@ -7,7 +7,7 @@
    
    "description": "Some improvements for godville ui",
    "name": "godville-ui",
-   "version": "0.0.2",
+   "version": "0.0.4",
    "icons": {
    	"128": "logo128.png",
    	"16": "logo16.png",
