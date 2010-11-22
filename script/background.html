@@ -1,0 +1,20 @@
+<html>
+  <script type="text/javascript">
+chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
+    if (request.method == "getWords"){
+        var sects = ['heal', 'pray', 'sacrifice', 'exp', 'gold', 'hit', 'do_task', 'cancel_task', 'die', 'town', 'heil'];
+        var response = {'phrases' : {}};
+        for (var i = 0; i < sects.length; i++){
+            var t = sects[i];
+            var text_list = localStorage [t];
+            if (text_list && text_list != ""){
+                response['phrases'][t] = text_list.split("||");
+            };
+        }
+        sendResponse(response);
+    }
+    else
+      sendResponse({}); // snub them.
+});
+  </script>
+</html>

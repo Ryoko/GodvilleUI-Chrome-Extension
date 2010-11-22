@@ -14,7 +14,7 @@
                 <div id="global_opt" style="padding-top: 1.3em;">
                     <form id="main_set">
                         <fieldset>
-                            <legend>Общие сведения</legend>
+                            <legend>Базовые настройки</legend>
                             <div id="opt_change_profile">
                                 <div class="new_line">
                                     <span class="l_capt">Показывать статистику</span>
@@ -49,55 +49,26 @@
                     <form id="words">
                         <fieldset>
                             <legend>Гласы</legend>
+                            <a id="l_heal">Лечись</a>
+                            <a id="l_pray">Молись</a>
+                            <a id="l_sacrifice">Жертвуй</a>
+                            <a id="l_exp">Опыт</a>
+                            <a id="l_gold">Клад</a>
+                            <a id="l_hit">Бей</a>
+                            <a id="l_do_task">Задание</a>
+                            <a id="l_cancel_task">Отменить задание</a>
+                            <a id="l_die">Умри</a>
+                            <a id="l_town">В город</a>
                             <div id="opt_change_words">
                                 <div class="new_line">
-                                    <label class="l_capt">Лечись</label>
-                                    <textarea id="heal" name="heal" class="rounded_field"  rows="4" wrap="virtual;"></textarea>
-                                </div>
-                                <div class="new_line">
-                                    <label class="l_capt">Молись</label>
-                                    <textarea id="Pray" name="heal" class="rounded_field"  rows="4" wrap="virtual;"></textarea>
-                                </div>
-                                <div class="new_line">
-                                    <label class="l_capt">Жертвуй</label>
-                                    <textarea id="sacrifice" name="heal" class="rounded_field"  rows="4" wrap="virtual;"></textarea>
-                                </div>
-                                <div class="new_line">
-                                    <label class="l_capt">Больше Опыта</label>
-                                    <textarea id="exp" name="heal" class="rounded_field"  rows="4" wrap="virtual;"></textarea>
-                                </div>
-                                <div class="new_line">
-                                    <label class="l_capt">Копай Клад</label>
-                                    <textarea id="gold" name="heal" class="rounded_field"  rows="4" wrap="virtual;"></textarea>
-                                </div>
-                                <div class="new_line">
-                                    <label class="l_capt">Бей</label>
-                                    <textarea id="hit" name="heal" class="rounded_field"  rows="4" wrap="virtual;"></textarea>
-                                </div>
-                                <div class="new_line">
-                                    <label class="l_capt">Выполняй задание</label>
-                                    <textarea id="do_task" name="heal" class="rounded_field"  rows="4" wrap="virtual;"></textarea>
-                                </div>
-                                <div class="new_line">
-                                    <label class="l_capt">Отмени задание</label>
-                                    <textarea id="cancel_task" name="heal" class="rounded_field"  rows="4" wrap="virtual;"></textarea>
-                                </div>
-                                <div class="new_line">
-                                    <label class="l_capt">Иди в город</label>
-                                    <textarea id="town" name="heal" class="rounded_field"  rows="4" wrap="virtual;"></textarea>
-                                </div>
-                                <div class="new_line">
-                                    <label class="l_capt">Умри</label>
-                                    <textarea id="die" name="heal" class="rounded_field"  rows="4" wrap="virtual;"></textarea>
-                                </div>
-                                <div class="new_line">
-                                    <label class="l_capt">Восклицания</label>
-                                    <textarea id="heil" name="heil" class="rounded_field"  rows="4" wrap="virtual;"></textarea>
+                                    <label id="ta_name" class="l_capt"></label>
+                                    <textarea id="ta_edit" name="heal" class="rounded_field"  rows="4" wrap="virtual;"></textarea>
                                 </div>
                             </div>
                             <div class="new_line">
                                 <div id="heal_words">
                                     <input id = "submit2" class="input_btn" name="commit" type="submit" value="Сохранить">
+                                    <input id = "cancel2" class="input_btn" name="cancel" type="button" value="Восстановить по умолчанию">
                                     <img align="middle" alt="Spinner" border="0" id="chword_msg"
                                          src="/images/spinner.gif?1277083719"
                                          style="vertical-align:bottom; display: none;">
