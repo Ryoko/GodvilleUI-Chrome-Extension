@@ -112,7 +112,7 @@ var menu_bar = {
 		this.bar = $('<div id="ui_menu_bar"></div>').append(this.items);
 		this.bar.toggle(storage.get('ui_menu_visible') == 'true' || false);
 		//append basic elems
-		this.append($('<strong>Godville UI:</strong>'));
+		this.append($('<strong>Godville UI (v.0.0.4):</strong>'));
 		this.append(this.reformalLink);
 		if (is_developer()) {
 			this.append(this.getDumpButton());
@@ -175,11 +175,29 @@ var storage = {
 };
 
 var words = {
-	init: function() {
+    init: function() {
+        chrome.extension.sendRequest({method: "getWords"}, function(response) {
+            words.response = response;
+            words._init();
+            return false;
+        });
+        this._init();
+    },
+	_init: function() {
 		// JSON.parse не поддерживает комментарии в JSON. Whyyyyy ???
 		// пришлось использовать небезопасный eval.
 		// TODO: JSON.minify? yaml? -- и для того и другого нужна еще одна библиотечка
-		this.base = getWords();
+//        this.waitResponce();
+        this.base = getWords();
+        var sects = ['heal', 'pray', 'sacrifice', 'exp', 'gold', 'hit', 'do_task', 'cancel_task', 'die', 'town', 'heil'];
+        for (var i = 0; i < sects.length; i++){
+            var t = sects[i];
+            var text_list = (this.response) ? this.response['phrases'][t] : [];
+            if (text_list && text_list.length > 0){
+                this.base['phrases'][t] = text_list;
+            };
+         }
+
 		this.version = this.base['version'];
 
 		// Проверка версии
@@ -193,7 +211,10 @@ var words = {
 				  + " - или, если Вы изменяли phrases.json, и сейчас используете его, вручную найти что изменилось и поправить");
 		}
 	},
-
+    waitResponce: function(){
+        if (this.response) return;
+        setInterval(this.waitResponce(), 100);
+    },
 	// Phrase gen
 	randomPhrase: function(sect) {
 		return getRandomItem(this.base['phrases'][sect]);
@@ -252,7 +273,7 @@ var stats = {
 	setFromLabelCounter: function(id, $container, label, parser) {
 		parser = parser || parseInt;
 		var $label = findLabel($container, label);
-		var $field = $label.next('.field_content');
+		var $field = $label.siblings('.field_content');
 		var value = parser($field.text());
 
 		return this.set(id, value);
@@ -564,7 +585,7 @@ function generateArenaPhrase() {
 	}
 	// TODO: shuffle parts
 	// TODO: smart join: .... , .... и ....
-	var msg = parts.join(', ');
+	var msg = parts.join(' ');
 	if(msg.length < 80) {
 		return msg;
 	} else {
@@ -580,7 +601,7 @@ function getArenaSayBox() {
 	appendCheckbox($div, 'say_heal', 'лечись');
 	appendCheckbox($div, 'say_pray', 'молись');
 
-	$div.click(function() { sayToHero(generateArenaPhrase);});
+	$div.click(function() { sayToHero(generateArenaPhrase());});
 	return $div;
 }
 
