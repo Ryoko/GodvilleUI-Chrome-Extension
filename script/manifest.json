@@ -5,7 +5,7 @@
       "matches": [  "http://godville.net/hero*" ]
    },
    {
-       "js": [ "jquerymin.js", "options.js" ],
+       "js": [ "jquerymin.js", "phrases.js", "options.js" ],
        "matches": [  "http://godville.net/user/profile*" ]
    }],
    "description": "GodVilleUI: interface improvement",

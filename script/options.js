@@ -3,22 +3,23 @@ var phrases = {heal : "Лечись", pray: "Молись", sacrifice : "Жер�
                 do_task : "Задание", cancel_task : "Отмени задание", die : "Умри", town : "Домой", heil : "Восклицания"};
 var def;
 var curr_sect;
+var god_name;
 
 function createSection(name, text, type){
-    var $out;
+    var $d = $('<div class="new_line"></div>');
     if (type == '') type = 'text';
-    if (type != 'submit'){
-        $out = $('<span class="l_capt">' + text + '</span>');
-        $out = $out.after($('<input>').attr({id : name , name : name, type : type }).wrap('<div class="field_content"></div>'));
+    if (type != 'submit') {
+        $d.append('<span class="l_capt">' + text + '</span>');
+        $d.append($('<div class="field_content"></div>').append($('<input>').attr({id : name , name : name, type : type })));
     }else{
-        $out = $('<input class="input_btn" type="submit">').attr({id : name , name : name, value : text }).wrap('<div id="options_'+name+'"></div>');
+        $d.append($('<div id="options_'+name+'"></div>').append($('<input class="input_btn" type="submit">').attr({id : name , name : name, value : text })));
     }
-    return $out.wrap('<div class="new_line"></div>');
+    return $d;
 }
 
 function createWordForm(){
     return $('\
-    <div id="godvilleUI_words">\
+    <div id="godvilleUI_words" style="padding-top: 4em;">\
         <form id="words">\
             <fieldset>\
                 <legend>Гласы</legend>\
@@ -35,7 +36,7 @@ function createWordForm(){
                 <div id="opt_change_words">\
                     <div class="new_line">\
                         <label id="ta_name" class="l_capt"></label>\
-                        <textarea id="ta_edit" name="heal" class="rounded_field"  rows="4" wrap="virtual;"></textarea>\
+                        <textarea id="ta_edit" name="heal" class="rounded_field"  rows="4" wrap="virtual;" style="width: 100%;"></textarea>\
                     </div>\
                 </div>\
                 <div class="new_line">\
@@ -52,16 +53,19 @@ function createWordForm(){
     </div>\
     ');
     }
-
 function setForm(){
 //    var $op_global = $('<div id="change_password_form" style="padding-top: 4em;"></div>')
-    var $opt = createSection('use_hero_name', 'Добавлять в глас имя героя', 'checkbox');
-    $opt = $opt.after(createSection('use_heil', 'Добавлять в глас восклицания', 'checkbox'));
-    $opt = $opt.after(createSection('GodvilleUI_general', 'Применить', 'submit'));
-    $opt = $opt.wrap('<div id="add_general"></div>');
-    $opt = $opt.before('<legend>GodvilleUI настройки</legend>');
-    $opt = $opt.wrap('<div id="godvilleUI_options"><form><fieldset></fieldset></form></div>');
-    $('div#change_password_form').after($opt).after(createWordForm());
+    var $opt = $('<div id="godvilleUI_options" style="padding-top: 4em;"></div>');
+    var $opt_i = $('<div id="add_general"></div>');
+    $opt_i.append(createSection('use_hero_name', 'Добавлять в глас имя героя', 'checkbox'));
+    $opt_i.append(createSection('use_heil', 'Добавлять в глас восклицания', 'checkbox'));
+    $opt_i.append(createSection('GodvilleUI_general', 'Применить', 'submit'));
+    $leg = $('<legend>GodvilleUI настройки</legend>');
+    $opt.append($leg);
+    $leg.wrap('<form><fieldset></fieldset></form>').after($opt_i);
+    $('div#change_password_form').after(createWordForm()).after($opt);
+
+    god_name = $('div#opt_change_profile div:first div:first').text();
 /*
 <form action="/user/update_password" method="post" onsubmit="Element.show('chpwd_msg'); new Ajax.Request('/user/update_password', {asynchronous:true, evalScripts:true, onComplete:function(request){Element.hide('chpwd_msg')}, onSuccess:function(request){$('ch_pwd_form').down('form').reset();}, parameters:Form.serialize(this)}); return false;">
   <fieldset>
@@ -120,7 +124,7 @@ function save_options(form) {
     var text = $('textarea#ta_edit').val();
     if (text == "") return;
     var t_list = text.split("\n");
-    localStorage[curr_sect] = t_list.join("||");
+    localStorage["GM_" + god_name + ":phrases_" + curr_sect] = t_list.join("||");
 
   // Update status to let user know options were saved.
 /*  var status = document.getElementById("status");
@@ -138,7 +142,7 @@ function setText(element_name){
     $e = $('form#words fieldset a#l_'+element_name)
     $e.css({'text-decoration' : 'none', 'color' : '#DA251D'});
     var $elem = $('textarea#ta_edit');
-    var text_list = localStorage[element_name];
+    var text_list = localStorage["GM_" + god_name + ":phrases_" + element_name];
     var text = (text_list && text_list != "") ? text_list.split("||") : def['phrases'][element_name];
     $elem.attr('rows', text.length);
     $elem.text(text.join("\n"));
