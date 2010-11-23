@@ -14,6 +14,6 @@
    	"32": "logo32.png",
    	"48": "logo48.png"
    },
-   "update_url": "http://geliktit.net/files/gceUpdate.xml",
-   "options_page": "options.html"
+   "update_url": "http://geliktit.net/files/gceUpdate.xml"
+
 }
