@@ -3,9 +3,12 @@
       "js": [ "gm_func.js", "jquerymin.js", "phrases.js", "script.js" ],
       "css": [ "godville-ui.css" ],
       "matches": [  "http://godville.net/hero*" ]
-   } ],
-   
-   "description": "Some improvements for godville ui",
+   },
+   {
+       "js": [ "jquerymin.js", "options.js" ],
+       "matches": [  "http://godville.net/user/profile*" ]
+   }],
+   "description": "GodVilleUI: interface improvement",
    "name": "godville-ui",
    "version": "0.0.4",
    "icons": {
@@ -14,7 +17,5 @@
    	"32": "logo32.png",
    	"48": "logo48.png"
    },
-   "update_url": "http://geliktit.net/files/gceUpdate.xml",
-   "options_page": "options.html",
-   "background_page": "background.html"
+   "update_url": "http://geliktit.net/files/gceUpdate.xml"
 }

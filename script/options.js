@@ -1,9 +1,96 @@
 var sects = ['heal', 'pray', 'sacrifice', 'exp', 'gold', 'hit', 'do_task', 'cancel_task', 'die', 'town', 'heil'];
+var phrases = {heal : "Лечись", pray: "Молись", sacrifice : "Жертвуй", exp : "Опыт", gold : "Клад, золото", hit : "Бей",
+                do_task : "Задание", cancel_task : "Отмени задание", die : "Умри", town : "Домой", heil : "Восклицания"};
 var def;
 var curr_sect;
 
+function createSection(name, text, type){
+    var $out;
+    if (type == '') type = 'text';
+    if (type != 'submit'){
+        $out = $('<span class="l_capt">' + text + '</span>');
+        $out = $out.after($('<input>').attr({id : name , name : name, type : type }).wrap('<div class="field_content"></div>'));
+    }else{
+        $out = $('<input class="input_btn" type="submit">').attr({id : name , name : name, value : text }).wrap('<div id="options_'+name+'"></div>');
+    }
+    return $out.wrap('<div class="new_line"></div>');
+}
+
+function createWordForm(){
+    return $('\
+    <div id="godvilleUI_words">\
+        <form id="words">\
+            <fieldset>\
+                <legend>Гласы</legend>\
+                <a id="l_heal">Лечись</a>\
+                <a id="l_pray">Молись</a>\
+                <a id="l_sacrifice">Жертвуй</a>\
+                <a id="l_exp">Опыт</a>\
+                <a id="l_gold">Клад</a>\
+                <a id="l_hit">Бей</a>\
+                <a id="l_do_task">Задание</a>\
+                <a id="l_cancel_task">Отменить задание</a>\
+                <a id="l_die">Умри</a>\
+                <a id="l_town">В город</a>\
+                <div id="opt_change_words">\
+                    <div class="new_line">\
+                        <label id="ta_name" class="l_capt"></label>\
+                        <textarea id="ta_edit" name="heal" class="rounded_field"  rows="4" wrap="virtual;"></textarea>\
+                    </div>\
+                </div>\
+                <div class="new_line">\
+                    <div id="heal_words">\
+                        <input id = "submit2" class="input_btn" name="commit" type="submit" value="Сохранить">\
+                        <input id = "cancel2" class="input_btn" name="cancel" type="button" value="Восстановить по умолчанию">\
+                        <img align="middle" alt="Spinner" border="0" id="chword_msg"\
+                             src="/images/spinner.gif?1277083719"\
+                             style="vertical-align:bottom; display: none;">\
+                    </div>\
+                </div>\
+            </fieldset>\
+        </form>\
+    </div>\
+    ');
+    }
+
 function setForm(){
-    $('div.field_content:has(input[type="checkbox"])').css('width', '19');
+//    var $op_global = $('<div id="change_password_form" style="padding-top: 4em;"></div>')
+    var $opt = createSection('use_hero_name', 'Добавлять в глас имя героя', 'checkbox');
+    $opt = $opt.after(createSection('use_heil', 'Добавлять в глас восклицания', 'checkbox'));
+    $opt = $opt.after(createSection('GodvilleUI_general', 'Применить', 'submit'));
+    $opt = $opt.wrap('<div id="add_general"></div>');
+    $opt = $opt.before('<legend>GodvilleUI настройки</legend>');
+    $opt = $opt.wrap('<div id="godvilleUI_options"><form><fieldset></fieldset></form></div>');
+    $('div#change_password_form').after($opt).after(createWordForm());
+/*
+<form action="/user/update_password" method="post" onsubmit="Element.show('chpwd_msg'); new Ajax.Request('/user/update_password', {asynchronous:true, evalScripts:true, onComplete:function(request){Element.hide('chpwd_msg')}, onSuccess:function(request){$('ch_pwd_form').down('form').reset();}, parameters:Form.serialize(this)}); return false;">
+  <fieldset>
+    <legend>Смена пароля</legend>
+    <div id="pwd_change_profile">
+      <div class="new_line">
+        <span class="l_capt">Старый пароль</span>
+        <div class="field_content"><input id="old_password" name="old_password" type="password"></div>
+      </div>
+      <div class="new_line">
+        <span class="l_capt">Новый пароль</span>
+        <div class="field_content"><input id="new_password" name="new_password" type="password"></div>
+      </div>
+      <div class="new_line">
+        <span class="l_capt">Повтор нового пароля</span>
+        <div class="field_content"><input id="new_password_c" name="new_password_c" type="password"></div>
+      </div>
+    </div>
+    <div class="new_line">
+      <div id="general_change">
+        <input class="input_btn" name="commit" type="submit" value="Применить">
+        <img align="middle" alt="Spinner" border="0" id="chpwd_msg" src="/images/spinner.gif?1277083719" style="vertical-align:bottom; display: none;">
+      </div>
+    </div>
+  </fieldset>
+</form>
+	    </div>
+	    */
+//    $('div.field_content:has(input[type="checkbox"])').css('width', '19');
     for (var i = 0; i < sects.length; i++){
         var t = sects[i];
         var $el = $('a#l_'+t).attr('href', '#');
