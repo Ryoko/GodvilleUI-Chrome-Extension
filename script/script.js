@@ -175,15 +175,7 @@ var storage = {
 };
 
 var words = {
-    init: function() {
-        chrome.extension.sendRequest({method: "getWords"}, function(response) {
-            words.response = response;
-            words._init();
-            return false;
-        });
-        this._init();
-    },
-	_init: function() {
+	init: function() {
 		// JSON.parse не поддерживает комментарии в JSON. Whyyyyy ???
 		// пришлось использовать небезопасный eval.
 		// TODO: JSON.minify? yaml? -- и для того и другого нужна еще одна библиотечка
@@ -192,12 +184,12 @@ var words = {
         var sects = ['heal', 'pray', 'sacrifice', 'exp', 'gold', 'hit', 'do_task', 'cancel_task', 'die', 'town', 'heil'];
         for (var i = 0; i < sects.length; i++){
             var t = sects[i];
-            var text_list = (this.response) ? this.response['phrases'][t] : [];
-            if (text_list && text_list.length > 0){
-                this.base['phrases'][t] = text_list;
-            };
+            var text = localStorage["GM_" + god_name + ":phrases_" + t];
+//            var text_list = god_name (this.response) ? this.response['phrases'][t] : [];
+            if (text && text != ""){
+                this.base['phrases'][t] = text.split("||");
+            }
          }
-
 		this.version = this.base['version'];
 
 		// Проверка версии
@@ -211,10 +203,6 @@ var words = {
 				  + " - или, если Вы изменяли phrases.json, и сейчас используете его, вручную найти что изменилось и поправить");
 		}
 	},
-    waitResponce: function(){
-        if (this.response) return;
-        setInterval(this.waitResponce(), 100);
-    },
 	// Phrase gen
 	randomPhrase: function(sect) {
 		return getRandomItem(this.base['phrases'][sect]);
