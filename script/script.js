@@ -564,7 +564,7 @@ function generateArenaPhrase() {
 	}
 	// TODO: shuffle parts
 	// TODO: smart join: .... , .... и ....
-	var msg = parts.join(', ');
+	var msg = parts.join(' ');
 	if(msg.length < 80) {
 		return msg;
 	} else {
@@ -580,7 +580,7 @@ function getArenaSayBox() {
 	appendCheckbox($div, 'say_heal', 'лечись');
 	appendCheckbox($div, 'say_pray', 'молись');
 
-	$div.click(function() { sayToHero(generateArenaPhrase);});
+	$div.click(function() { sayToHero(generateArenaPhrase());});
 	return $div;
 }
 
