@@ -33,6 +33,7 @@ function createWordForm(){
                 <a id="l_cancel_task">Отменить задание</a>\
                 <a id="l_die">Умри</a>\
                 <a id="l_town">В город</a>\
+                <a id="l_heil">Восклицание</a>\
                 <div id="opt_change_words">\
                     <div class="new_line">\
                         <label id="ta_name" class="l_capt"></label>\
@@ -43,8 +44,8 @@ function createWordForm(){
                     <div id="heal_words">\
                         <input id = "submit2" class="input_btn" name="commit" type="submit" value="Сохранить">\
                         <input id = "cancel2" class="input_btn" name="cancel" type="button" value="Восстановить по умолчанию">\
-                        <img align="middle" alt="Spinner" border="0" id="chword_msg"\
-                             src="/images/spinner.gif?1277083719"\
+                        <img align="middle" alt="Spinner" border="0" id="gui_word_progress"\
+                             src="/images/spinner.gif"\
                              style="vertical-align:bottom; display: none;">\
                     </div>\
                 </div>\
@@ -60,9 +61,12 @@ function setForm(){
     $opt_i.append(createSection('use_hero_name', 'Добавлять в глас имя героя', 'checkbox'));
     $opt_i.append(createSection('use_heil', 'Добавлять в глас восклицания', 'checkbox'));
     $opt_i.append(createSection('GodvilleUI_general', 'Применить', 'submit'));
+    $opt_i.append('<img align="middle" alt="Spinner" border="0" id="gui_options_progress"\
+                             src="/images/spinner.gif"\
+                             style="vertical-align:bottom; display: none;">')
     $leg = $('<legend>GodvilleUI настройки</legend>');
     $opt.append($leg);
-    $leg.wrap('<form><fieldset></fieldset></form>').after($opt_i);
+    $leg.wrap('<form id="add_options"><fieldset></fieldset></form>').after($opt_i);
     $('div#change_password_form').after(createWordForm()).after($opt);
 
     god_name = $('div#opt_change_profile div:first div:first').text();
@@ -102,7 +106,7 @@ function setForm(){
     }
     var $bt1 = $('form#words').submit(function(){ save_options(1); return false;});
     $('form#words input[type="submit"]').attr('disabled', 'disabled');
-    var $bt2 = $('form#main_set').submit(function(){ save_options(2); return false;});
+    var $bt2 = $('form#add_options').submit(function(){ save_options(2); return false;});
     var $bt3 = $('form#words input[type="button"]').click(function(){ reset_options(1); return false;});
 //    var $bt4 = $('form#main_set').click(function(){ reset_options(2); });
 }
@@ -121,17 +125,25 @@ function reset_options(form) {
 }
 
 function save_options(form) {
-    var text = $('textarea#ta_edit').val();
-    if (text == "") return;
-    var t_list = text.split("\n");
-    localStorage["GM_" + god_name + ":phrases_" + curr_sect] = t_list.join("||");
-
-  // Update status to let user know options were saved.
-/*  var status = document.getElementById("status");
-  status.innerHTML = "Options Saved.";
-  setTimeout(function() {
-    status.innerHTML = "";
-  }, 750);*/
+    if (form == 1){
+        $('img#gui_word_progress').show();
+        var text = $('textarea#ta_edit').val();
+        if (text == "") return;
+        var t_list = text.split("\n"); var t_out = [];
+        for (var i = 0; i < t_list.length; i++){
+            if (t_list[i] != '') t_out.push(t_list[i]);
+        }
+        localStorage["GM_" + god_name + ":phrases_" + curr_sect] = t_out.join("||");
+        $('img#gui_word_progress').fadeOut("slow");
+        setText(curr_sect);
+    }else{
+        $('img#gui_options_progress').show();
+        var hero_name_chk = $('input#use_hero_name').val() == 'on';
+        var use_heil_chk = $('input#use_heil').val() == 'on';
+        localStorage["GM_" + god_name + ":useHeroName"] = hero_name_chk;
+        localStorage["GM_" + god_name + ":useHeil"] = use_heil_chk;
+        $('img#gui_options_progress').fadeOut('slow');
+    }
 }
 
 function setText(element_name){
@@ -157,14 +169,13 @@ function getText(element_name){
 // Restores select box state to saved value from localStorage.
 function restore_options() {
     def = getWords();
-
-//    for (var i = 0; i < sects.length; i++){
-//        setText(sects[i]);
-//    }
-//  var favorite = localStorage["favorite_color"];
+    if (localStorage["GM_" + god_name + ":useHeroName"] == 'true'){
+        $('input#use_hero_name').attr('checked', 'checked');
+    }
+    if (localStorage["GM_" + god_name + ":useHeil"] == 'true'){
+       $('input#use_heil').attr('checked', 'checked');
+    }
 }
 
-$(function(){
-    setForm();
-    restore_options();
-});
+setForm();
+restore_options();
