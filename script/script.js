@@ -114,7 +114,7 @@ var menu_bar = {
 		this.bar = $('<div id="ui_menu_bar"></div>').append(this.items);
 		this.bar.toggle(storage.get('ui_menu_visible') == 'true' || false);
 		//append basic elems
-		this.append($('<strong>Godville UI (v.0.1.0):</strong>'));
+		this.append($('<strong>Godville UI (v.0.1.1):</strong>'));
 		this.append(this.reformalLink);
 		if (is_developer()) {
 			this.append(this.getDumpButton());
@@ -243,7 +243,7 @@ var words = {
     },
 
     _addHeil: function(text){
-        if ((localStorage["GM_" + god_name + ":useHeil"] != 'true')) return '';
+        if ((localStorage["GM_" + god_name + ":useHeil"] != 'true')) return text;
         return getRandomItem(this.base['phrases']['heil']) + ', ' + this._changeFirstLetter(text);
     },
 
