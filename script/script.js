@@ -5,8 +5,10 @@ var latest_version_link = 'http://github.com/Ryoko/godville-ui/raw/master/versio
 var source_link_template = 'http://github.com/Ryoko/godville-ui/raw/%tag%/godville-ui.user.js';
 
 var god_name = $('#menu_top').text().replace(/Приветствуем, о (.+)\!/, '$1' );
-var developers = ['Neniu'];
-
+var developers = ['Neniu', 'Ryoko'];
+var char_name = isArena() ?
+        $('div#hero1_info fieldset div:first-child div').text() :
+        $('div#hi_box div a[href^="/gods/"]').text();
 // Style
 //GM_addStyle('Style');
 
@@ -112,7 +114,7 @@ var menu_bar = {
 		this.bar = $('<div id="ui_menu_bar"></div>').append(this.items);
 		this.bar.toggle(storage.get('ui_menu_visible') == 'true' || false);
 		//append basic elems
-		this.append($('<strong>Godville UI (v.0.0.4):</strong>'));
+		this.append($('<strong>Godville UI (v.0.1.0):</strong>'));
 		this.append(this.reformalLink);
 		if (is_developer()) {
 			this.append(this.getDumpButton());
@@ -204,24 +206,46 @@ var words = {
 		}
 	},
 	// Phrase gen
-	randomPhrase: function(sect) {
-		return getRandomItem(this.base['phrases'][sect]);
-	},
-	longPhrase: function(sect, len) {
-		phrases = this._longPhrase_recursion(this.base['phrases'][sect].slice(), len || 78);
-		return phrases.join(' ');
-	},
-	inspectPhrase: function(item_name) {
-		return this.randomPhrase('inspect_prefix') + ' "' + item_name + '"';
+    randomPhrase: function(sect) {
+        return getRandomItem(this.base['phrases'][sect]);
+    },
+
+    longPhrase: function(sect, len) {
+        var prefix = this.getPhrasePrefixed('');
+        var phrases = this._longPhrase_recursion(this.base['phrases'][sect].slice(), (len || 78) - prefix.length);
+        return prefix ? prefix + this._changeFirstLetter(phrases.join(' ')) : phrases.join(' ');
+    },
+
+    inspectPhrase: function(item_name) {
+		return this.getPhrasePrefixed(this.randomPhrase('inspect_prefix') + ' "' + item_name + '"!');
 	},
 
 	// Checkers
 	isCategoryItem: function(cat, item_name) {
 		return this.base['items'][cat].indexOf(item_name) >= 0;
 	},
+
 	canBeActivated: function($obj) {
 		return $obj.text().match(/\(\@\)/);
 	},
+
+    _changeFirstLetter: function(text){
+        return text.charAt(0).toLowerCase() + text.slice(1);
+    },
+
+    getPhrasePrefixed: function(text){
+        return this._addHeroName(this._addHeil(text));
+    },
+
+    _addHeroName: function(text){
+        if ((localStorage["GM_" + god_name + ":useHeroName"] != 'true')) return text;
+        return char_name + ', ' + this._changeFirstLetter(text);
+    },
+
+    _addHeil: function(text){
+        if ((localStorage["GM_" + god_name + ":useHeil"] != 'true')) return '';
+        return getRandomItem(this.base['phrases']['heil']) + ', ' + this._changeFirstLetter(text);
+    },
 
 	// Private (или типа того)
 	_longPhrase_recursion: function(source, len) {
@@ -229,8 +253,7 @@ var words = {
 			var next = popRandomItem(source);
 			var remainder = len - next.length - 2; // 2 for ', '
 			if ( remainder > 0) {
-				var res = [next].concat(this._longPhrase_recursion(source, remainder));
-				return res;
+                return [next].concat(this._longPhrase_recursion(source, remainder));
 			}
 		}
 		return [];
@@ -573,7 +596,7 @@ function generateArenaPhrase() {
 	}
 	// TODO: shuffle parts
 	// TODO: smart join: .... , .... и ....
-	var msg = parts.join(' ');
+	var msg = words.getPhrasePrefixed(parts.join(' '));
 	if(msg.length < 80) {
 		return msg;
 	} else {
