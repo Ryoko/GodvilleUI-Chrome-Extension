@@ -4,10 +4,12 @@ var script_link = 'http://userscripts.org/scripts/show/81101';
 var latest_version_link = 'http://github.com/Ryoko/godville-ui/raw/master/version';
 var source_link_template = 'http://github.com/Ryoko/godville-ui/raw/%tag%/godville-ui.user.js';
 
-var god_name = $('#menu_top').text().replace(/Приветствуем, о (.+)\!/, '$1' );
+var god_name = isArena() ?
+        $.trim($('div#hero1_info fieldset div div a[href*="/gods/"]').text()):
+        $('#menu_top').text().replace(/Приветствуем, о (.+)\!/, '$1' );
 var developers = ['Neniu', 'Ryoko'];
 var char_name = isArena() ?
-        $('div#hero1_info fieldset div:first-child div').text() :
+        $.trim($('div#hero1_info fieldset div:first div').text()):
         $('div#hi_box div a[href^="/gods/"]').text();
 // Style
 //GM_addStyle('Style');
@@ -114,7 +116,7 @@ var menu_bar = {
 		this.bar = $('<div id="ui_menu_bar"></div>').append(this.items);
 		this.bar.toggle(storage.get('ui_menu_visible') == 'true' || false);
 		//append basic elems
-		this.append($('<strong>Godville UI (v.0.1.2):</strong>'));
+		this.append($('<strong>Godville UI (v.0.1.3):</strong>'));
 		this.append(this.reformalLink);
 		if (is_developer()) {
 			this.append(this.getDumpButton());
@@ -239,6 +241,7 @@ var words = {
     },
 
     getPhrasePrefixed: function(text){
+        if (text == "") return "";
         return this._addHeroName(this._addHeil(text));
     },
 
@@ -601,12 +604,32 @@ function generateArenaPhrase() {
 	}
 	// TODO: shuffle parts
 	// TODO: smart join: .... , .... и ....
-	var msg = words.getPhrasePrefixed(parts.join(' '));
+    parts = shuffleArray(parts);
+	var msg = words.getPhrasePrefixed(smartJoin(parts));
 	if(msg.length < 80) {
 		return msg;
 	} else {
 		return generateArenaPhrase();
 	}
+}
+
+function shuffleArray(phrases){
+    var out = [];
+    while (phrases.length > 0){
+        out.push(popRandomItem(phrases));
+    }
+    return out;
+}
+
+function smartJoin(parts){
+    var out = "";
+    var trim_last = /[.!]$/;
+    for (var i = 0; i < parts.length; i++){
+        out += (i == 0)? "" : (i != parts.length - 1) ? ", " : " и ";
+        var p = (i != 0) ? words._changeFirstLetter(parts[i]) : parts[i];
+        out += (i != parts.length - 1) ? p.replace(trim_last, "") : p;
+    }
+    return out;
 }
 
 function getArenaSayBox() {
