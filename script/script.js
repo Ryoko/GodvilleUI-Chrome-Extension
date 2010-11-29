@@ -116,7 +116,7 @@ var menu_bar = {
 		this.bar = $('<div id="ui_menu_bar"></div>').append(this.items);
 		this.bar.toggle(storage.get('ui_menu_visible') == 'true' || false);
 		//append basic elems
-		this.append($('<strong>Godville UI (v.0.1.4):</strong>'));
+		this.append($('<strong>Godville UI (v.0.1.5):</strong>'));
 		this.append(this.reformalLink);
 		if (is_developer()) {
 			this.append(this.getDumpButton());
@@ -213,7 +213,7 @@ var words = {
     },
 
     longPhrase: function(sect, len) {
-        var prefix = this.getPhrasePrefixed('');
+        var prefix = this._addHeroName(this._addHeil(''));
         var phrases;
         if (localStorage["GM_" + god_name + ":useShortPhrases"] == "true") {
             phrases = [getRandomItem(this.base['phrases'][sect])];
@@ -623,7 +623,7 @@ function shuffleArray(phrases){
 
 function smartJoin(parts){
     var out = "";
-    var trim_last = /[.!]$/;
+    var trim_last = /[\.!]$/;
     for (var i = 0; i < parts.length; i++){
         out += (i == 0)? "" : (i != parts.length - 1) ? ", " : " и ";
         var p = (i != 0) ? words._changeFirstLetter(parts[i]) : parts[i];
