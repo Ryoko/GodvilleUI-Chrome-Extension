@@ -116,7 +116,8 @@ var menu_bar = {
 		this.bar = $('<div id="ui_menu_bar"></div>').append(this.items);
 		this.bar.toggle(storage.get('ui_menu_visible') == 'true' || false);
 		//append basic elems
-		this.append($('<strong>Godville UI (v.0.1.5):</strong>'));
+        ///TODO: auto change version number
+		this.append($('<strong>Godville UI (v.0.2.0):</strong>'));
 		this.append(this.reformalLink);
 		if (is_developer()) {
 			this.append(this.getDumpButton());
@@ -753,6 +754,36 @@ function improveMailbox() {
 
 }
 
+function improveInterface(){
+    var $pw = $('div#page_wrapper');
+    var $c = $('div#acc_box div:first');
+    if (localStorage["GM_" + god_name + ":useWideScreen"] == 'true') {
+//        if ($pw.css('width') == '80%') return;
+        $pw.css('width', '80%');
+        var wdt = Math.floor(($c.width() - 48) / 6);
+        wdt = (wdt - Math.floor(wdt / 2) * 2) == 0 ? wdt - 1 : wdt;
+        var wd1 = Math.floor((wdt - 7) / 2);
+        var wd2 = Math.floor((wdt - 21) / 4);
+        $('div.field_content:eq(0) span div[class^="acc_"]', $c).width(wdt);
+        $('div.field_content:eq(1) span div[class^="acc_"]', $c).width(wd1);
+        $('div.field_content:eq(2) span div[class^="acc_"]', $c).width(wd2);
+    }else{
+        if ($pw.css('width') != '80%') return;
+        $pw.css('width', '995px');
+        $('div.field_content:eq(0) span div[class^="acc_"]', $c).width(57);
+        $('div.field_content:eq(1) span div[class^="acc_"]', $c).width(25);
+        $('div.field_content:eq(2) span div[class^="acc_"]', $c).width(9);
+
+    }
+    var imgURL = chrome.extension.getURL("background_default.jpg");
+    var $bkg = $('<div id=hero_background>').css({'background-image' : 'url(' + imgURL + ')', 'background-repeat' : 'repeat',
+        'position' : 'fixed', 'width' : '100%', 'height' : '100%', 'z-index' : '1'});
+    $('body').prepend($bkg);
+    $pw.css({'z-index': 2, 'position': 'relative'});
+//    $('body').css({'background-image' : 'url(' + imgURL + ')', 'background-repeat' : 'repeat'});
+    $('div[id$="_block"]').css('background', 'none repeat scroll 0% 0% transparent');
+}
+
 // -------- do all improvements ----------
 var ImproveInProcess = false;
 function improve() {
@@ -764,7 +795,7 @@ function improve() {
 		improveFieldBox();
 		improveEquip();
 		improveMailbox();
-
+        improveInterface();
 		informer.update('pvp', isArena());
 	} catch (x) {
 		GM_log(x);

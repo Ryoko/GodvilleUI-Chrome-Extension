@@ -61,6 +61,7 @@ function setForm(){
     $opt_i.append(createSection('use_hero_name', 'Добавлять в глас имя героя', 'checkbox'));
     $opt_i.append(createSection('use_heil', 'Добавлять в глас восклицания', 'checkbox'));
     $opt_i.append(createSection('use_short', 'Короткие фразы для гласов', 'checkbox'));
+    $opt_i.append(createSection('use_wide', 'Широкое окно героя', 'checkbox'));
     $opt_i.append(createSection('GodvilleUI_general', 'Применить', 'submit'));
     $opt_i.append('<img align="middle" alt="Spinner" border="0" id="gui_options_progress"\
                              src="/images/spinner.gif"\
@@ -142,9 +143,11 @@ function save_options(form) {
         var hero_name_chk = $('input#use_hero_name').val() == 'on';
         var use_heil_chk = $('input#use_heil').val() == 'on';
         var use_short_chk = $('input#use_short').val() == 'on';
+        var use_wideScreen = $('input#use_wide').val() == 'on';
         localStorage["GM_" + god_name + ":useHeroName"] = hero_name_chk;
         localStorage["GM_" + god_name + ":useHeil"] = use_heil_chk;
         localStorage["GM_" + god_name + ":useShortPhrases"] = use_short_chk;
+        localStorage["GM_" + god_name + ":useWideScreen"] = use_wideScreen;
         $('img#gui_options_progress').fadeOut('slow');
     }
 }
@@ -180,6 +183,9 @@ function restore_options() {
     }
     if (localStorage["GM_" + god_name + ":useShortPhrases"] == 'true'){
        $('input#use_short').attr('checked', 'checked');
+    }
+    if (localStorage["GM_" + god_name + ":useWideScreen"] == 'true'){
+       $('input#use_wide').attr('checked', 'checked');
     }
 }
 
