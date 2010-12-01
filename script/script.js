@@ -768,20 +768,22 @@ function improveInterface(){
         $('div.field_content:eq(1) span div[class^="acc_"]', $c).width(wd1);
         $('div.field_content:eq(2) span div[class^="acc_"]', $c).width(wd2);
     }else{
-        if ($pw.css('width') != '80%') return;
-        $pw.css('width', '995px');
-        $('div.field_content:eq(0) span div[class^="acc_"]', $c).width(57);
-        $('div.field_content:eq(1) span div[class^="acc_"]', $c).width(25);
-        $('div.field_content:eq(2) span div[class^="acc_"]', $c).width(9);
-
+        if ($pw.css('width') == '80%') {
+            $pw.css('width', '995px');
+            $('div.field_content:eq(0) span div[class^="acc_"]', $c).width(57);
+            $('div.field_content:eq(1) span div[class^="acc_"]', $c).width(25);
+            $('div.field_content:eq(2) span div[class^="acc_"]', $c).width(9);
+        }
     }
-    var imgURL = chrome.extension.getURL("background_default.jpg");
-    var $bkg = $('<div id=hero_background>').css({'background-image' : 'url(' + imgURL + ')', 'background-repeat' : 'repeat',
-        'position' : 'fixed', 'width' : '100%', 'height' : '100%', 'z-index' : '1'});
-    $('body').prepend($bkg);
-    $pw.css({'z-index': 2, 'position': 'relative'});
-//    $('body').css({'background-image' : 'url(' + imgURL + ')', 'background-repeat' : 'repeat'});
-    $('div[id$="_block"]').css('background', 'none repeat scroll 0% 0% transparent');
+    if ($('div#hero_background').length == 0) {
+        var imgURL = chrome.extension.getURL("background_default.jpg");
+        var $bkg = $('<div id=hero_background>').css({'background-image' : 'url(' + imgURL + ')', 'background-repeat' : 'repeat',
+            'position' : 'fixed', 'width' : '100%', 'height' : '100%', 'z-index' : '1'});
+        $('body').prepend($bkg);
+        $pw.css({'z-index': 2, 'position': 'relative'});
+        //    $('body').css({'background-image' : 'url(' + imgURL + ')', 'background-repeat' : 'repeat'});
+        $('div[id$="_block"]').css('background', 'none repeat scroll 0% 0% transparent');
+    }
 }
 
 // -------- do all improvements ----------
