@@ -5,12 +5,12 @@
       "matches": [  "http://godville.net/hero*" ]
    },
    {
-       "js": [ "jquerymin.js", "phrases.js", "options.js" ],
+       "js": [ "jquerymin.js", "phrases.js", "options-page.js", "options.js" ],
        "matches": [ "http://godville.net/user/profile*" ]
    }],
    "description": "GodVilleUI: interface improvement",
    "name": "godville-ui",
-   "version": "0.1.5",
+   "version": "0.2.0",
    "icons": {
    	"128": "logo128.png",
    	"16": "logo16.png",
