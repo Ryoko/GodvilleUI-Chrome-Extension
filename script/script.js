@@ -775,15 +775,26 @@ function improveInterface(){
             $('div.field_content:eq(2) span div[class^="acc_"]', $c).width(9);
         }
     }
-    if ($('div#hero_background').length == 0) {
-        var imgURL = chrome.extension.getURL("background_default.jpg");
-        var $bkg = $('<div id=hero_background>').css({'background-image' : 'url(' + imgURL + ')', 'background-repeat' : 'repeat',
-            'position' : 'fixed', 'width' : '100%', 'height' : '100%', 'z-index' : '1'});
-        $('body').prepend($bkg);
-        $pw.css({'z-index': 2, 'position': 'relative'});
-        //    $('body').css({'background-image' : 'url(' + imgURL + ')', 'background-repeat' : 'repeat'});
-        $('div[id$="_block"]').css('background', 'none repeat scroll 0% 0% transparent');
+    if (localStorage["GM_" + god_name + ":useBackground"] == 'true') {
+        if ($('div#hero_background').length == 0) {
+            var imgURL = chrome.extension.getURL("background_default.jpg");
+            var $bkg = $('<div id=hero_background>').css({'background-image' : 'url(' + imgURL + ')', 'background-repeat' : 'repeat',
+                'position' : 'fixed', 'width' : '100%', 'height' : '100%', 'z-index' : '1'});
+            $('body').prepend($bkg);
+            $pw.css({'z-index': 2, 'position': 'relative'});
+            //    $('body').css({'background-image' : 'url(' + imgURL + ')', 'background-repeat' : 'repeat'});
+            $('div[id$="_block"]').css('background', 'none repeat scroll 0% 0% transparent');
+        }
+    }else{
+        if ($('div#hero_background').length > 0) {
+            $('div#hero_background').remove();
+            $('div[id$="_block"]').removeAttr('style');
+            var width = $pw.css('width');
+            $pw.removeAttr('style');
+            $pw.css('width') = width;
+         }
     }
+
 }
 
 // -------- do all improvements ----------
