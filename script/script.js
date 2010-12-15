@@ -348,6 +348,10 @@ var logger = {
 
 	update: function() {
 		this.need_separator = true;
+        if (isArena()){
+            this.watchStatsValue('heal1', 'hero:hp', 'Здоровье героя', heal);
+            this.watchStatsValue('heal2', 'enemy:hp', 'Здоровье соперника', death);
+        }
 		this.watchStatsValue('prana', 'pr', 'Прана (проценты)');
 		this.watchStatsValue('exp', 'exp', 'Опыт (проценты)');
 		this.watchStatsValue('task', 'tsk', 'Задание (проценты)');
@@ -684,7 +688,11 @@ function improveFieldBox() {
 // ---------- Stats --------------
 
 function improveStats() {
-	if (isArena()) return;
+	if (isArena()) {
+        stats.setFromLabelCounter('heal1', $('#hero1_stats'), 'Здоровье');
+        stats.setFromLabelCounter('heal2', $('#hero2_stats'), 'Здоровье');
+        return;
+    }
 	if (isAlreadyImproved( $('#hs_box') )) return;
 
 	// Add links
