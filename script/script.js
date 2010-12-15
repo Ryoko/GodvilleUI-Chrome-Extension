@@ -1,16 +1,16 @@
-
+var $j = jQuery.noConflict();
 var version = 2;
 var script_link = 'http://userscripts.org/scripts/show/81101';
 var latest_version_link = 'http://github.com/Ryoko/godville-ui/raw/master/version';
 var source_link_template = 'http://github.com/Ryoko/godville-ui/raw/%tag%/godville-ui.user.js';
 
 var god_name = isArena() ?
-        $.trim($('div#hero1_info fieldset div div a[href*="/gods/"]').text()):
-        $('#menu_top').text().replace(/Приветствуем, о (.+)\!/, '$1' );
+        $j.trim($j('div#hero1_info fieldset div div a[href*="/gods/"]').text()):
+        $j.trim($j('div#hi_box div a[href*="/gods/"]').attr('href').replace('/gods/', ''));
 var developers = ['Neniu', 'Ryoko'];
 var char_name = isArena() ?
-        $.trim($('div#hero1_info fieldset div:first div').text()):
-        $('div#hi_box div a[href^="/gods/"]').text();
+        $j.trim($j('div#hero1_info fieldset div:first div').text()):
+        $j('div#hi_box div a[href^="/gods/"]').text();
 // Style
 //GM_addStyle('Style');
 
@@ -23,8 +23,8 @@ function is_developer() {
 }
 // Базовый алгоритм произнесения фразы
 function sayToHero(phrase) {
-	$('#aog_hint_label').hide();
-	$('#god_phrase').val(phrase);
+	$j('#aog_hint_label').hide();
+	$j('#god_phrase').val(phrase);
 }
 // Checks if $elem already improved
 function isAlreadyImproved($elem) {
@@ -34,8 +34,8 @@ function isAlreadyImproved($elem) {
 }
 
 function findLabel($base_elem, label_name) {
-	return $('.l_capt', $base_elem).filter(function(index){
-			return $(this).text() == label_name;
+	return $j('.l_capt', $base_elem).filter(function(index){
+			return $j(this).text() == label_name;
 		});
 }
 // Search for label with given name and appends after it
@@ -45,7 +45,7 @@ function addAfterLabel($base_elem, label_name, $elem) {
 }
 // Generic say button
 function getGenSayButton(title, section) {
-	return $('<a href="#">' + title + '</a>')
+	return $j('<a href="#">' + title + '</a>')
 		.click(function() {
 			sayToHero(words.longPhrase(section));
 			return false;
@@ -80,8 +80,8 @@ function popRandomItem(arr) {
 // timeout_bar.start([seconds]) -- пустить полоску
 var timeout_bar = {
 	create: function() {
-		this.elem = $('<div id="timeout_bar"/>');
-		$('#menu_bar').after(this.elem);
+		this.elem = $j('<div id="timeout_bar"/>');
+		$j('#menu_bar').after(this.elem);
 	},
 
 	start: function(timeout) {
@@ -95,14 +95,14 @@ var timeout_bar = {
 // UI Menu
 // ------------------------
 var menu_bar = {
-	reformalLink: $('<a id="reformal" href="http://godville-ui.reformal.ru/" target="about:blank">есть идеи?</a>'),
+	reformalLink: $j('<a id="reformal" href="http://godville-ui.reformal.ru/" target="about:blank">есть идеи?</a>'),
 
 	create: function() {
-		$('#menu_bar').after(this.constructMenuBar());
-		$('#menu_bar ul').append( $('<li> | </li>').append(this.getToggleButton()));
+		$j('#menu_bar').after(this.constructMenuBar());
+		$j('#menu_bar ul').append( $j('<li> | </li>').append(this.getToggleButton()));
 	},
 	append: function($obj) {
-		this.items.append( $('<li></li>').append($obj));
+		this.items.append( $j('<li></li>').append($obj));
 	},
 	toggle: function() {
 		this.bar.toggle();
@@ -112,12 +112,12 @@ var menu_bar = {
 		this.bar.show();
 	},
 	constructMenuBar: function() {
-		this.items = $('<ul></ul>');
-		this.bar = $('<div id="ui_menu_bar"></div>').append(this.items);
+		this.items = $j('<ul></ul>');
+		this.bar = $j('<div id="ui_menu_bar"></div>').append(this.items);
 		this.bar.toggle(storage.get('ui_menu_visible') == 'true' || false);
 		//append basic elems
         ///TODO: auto change version number
-		this.append($('<strong>Godville UI (v.0.2.0):</strong>'));
+		this.append($j('<strong>Godville UI (v.0.2.3):</strong>'));
 		this.append(this.reformalLink);
 		if (is_developer()) {
 			this.append(this.getDumpButton());
@@ -126,14 +126,14 @@ var menu_bar = {
 	},
 
 	getToggleButton: function() {
-		return $('<a href="#"><strong>ui</strong></a>')
+		return $j('<a href="#"><strong>ui</strong></a>')
 			.click(function() {
 					   menu_bar.toggle();
 					   return false;
 				   });
 	},
 	getDumpButton: function() {
-		return $('<a href="#" class="devel_link">dump</a>')
+		return $j('<a href="#" class="devel_link">dump</a>')
 			.click(function() {
 					   storage.dump();
 				   });
@@ -180,6 +180,7 @@ var storage = {
 };
 
 var words = {
+    currentPhrase: "",
 	init: function() {
 		// JSON.parse не поддерживает комментарии в JSON. Whyyyyy ???
 		// пришлось использовать небезопасный eval.
@@ -221,11 +222,13 @@ var words = {
         }else{
             phrases = this._longPhrase_recursion(this.base['phrases'][sect].slice(), (len || 78) - prefix.length);
         }
-        return prefix ? prefix + this._changeFirstLetter(phrases.join(' ')) : phrases.join(' ');
+        this.currentPhrase = prefix ? prefix + this._changeFirstLetter(phrases.join(' ')) : phrases.join(' ');
+        return this.currentPhrase;
     },
 
     inspectPhrase: function(item_name) {
-		return this.getPhrasePrefixed(this.randomPhrase('inspect_prefix') + ' "' + item_name + '"!');
+        this.currentPhrase = this.getPhrasePrefixed(this.randomPhrase('inspect_prefix') + ' "' + item_name + '"!');
+		return this.currentPhrase;
 	},
 
 	// Checkers
@@ -266,7 +269,13 @@ var words = {
 			}
 		}
 		return [];
-	}
+	},
+    checkCurrentPhrase: function(){
+        if ($j('#god_phrase').val() == "" && this.currentPhrase != ""){
+            $j('#aog_hint_label').hide();
+	        $j('#god_phrase').val(this.currentPhrase);
+        }
+    }
 };
 
 // ------------------------
@@ -317,8 +326,8 @@ var stats = {
 // logger.watchLabelCounter -- следить за значением лабела
 var logger = {
 	create: function() {
-		this.elem = $('<ul id="stats_log"/>');
-		$('#menu_bar').after(this.elem);
+		this.elem = $j('<ul id="stats_log"/>');
+		$j('#menu_bar').after(this.elem);
 	},
 
 	appendStr: function(id, klass, str, descr) {
@@ -395,7 +404,7 @@ var updater = {
 	},
 	getUpdateLink: function(label, version) {
 		var link = source_link_template.replace(/%tag%/, 'v' + version);
-		return $('<a id="update" href="' + link + '">' + label + '</a>');
+		return $j('<a id="update" href="' + link + '">' + label + '</a>');
 	},
 	insertLink: function() {
 		var installed = GM_getResourceText('Version');
@@ -431,8 +440,8 @@ var informer = {
 	flags: {},
 	init: function() {
 		// container
-		this.container = $('<div id="informer_bar"></div>');
-		$('#page_wrapper').prepend(this.container);
+		this.container = $j('<div id="informer_bar"></div>');
+		$j('#page_wrapper').prepend(this.container);
 
 		// load and draw labels
 		this.load();
@@ -476,7 +485,7 @@ var informer = {
 		storage.set('informer_flags', JSON.stringify(this.flags));
 	},
 	create_label: function(flag) {
-		var $label = $('<div>' + flag + '</div>')
+		var $label = $j('<div>' + flag + '</div>')
 			.click(function() {
 					   informer.hide(flag);
 					   return false;
@@ -484,9 +493,9 @@ var informer = {
 		this.container.append($label);
 	},
 	delete_label: function(flag) {
-		$('div', this.container)
+		$j('div', this.container)
 			.each(function() {
-					  var $this = $(this);
+					  var $this = $j(this);
 					  if($this.text() == flag) {
 						  $this.remove();
 					  }
@@ -534,10 +543,10 @@ var informer = {
 // Main button creater
 function improveLoot() {
 	if (isArena()) return;
-	if (isAlreadyImproved($('#inv_box'))) return;
+	if (isAlreadyImproved($j('#inv_box'))) return;
 
 	function createInspectButton(item_name) {
-		return $('<a href="#">?</a>')
+		return $j('<a href="#">?</a>')
 			.click(function(){
 				sayToHero(words.inspectPhrase(item_name));
 				return false;
@@ -550,9 +559,9 @@ function improveLoot() {
 	var bold_item = false;
 
 	// Parse items
-	$('#hero_loot ul li').each(function(ind, obj) {
-		var $obj = $(obj);
-		var item_name = $('span', $obj).text()
+	$j('#hero_loot ul li').each(function(ind, obj) {
+		var $obj = $j(obj);
+		var item_name = $j('span', $obj).text()
 									   .replace(/\(\@\)/, '')
 								       .replace(/\(\d+ шт\)/, '')
 									   .replace(/^\s+|\s+$/g, '');
@@ -570,7 +579,7 @@ function improveLoot() {
 		} else {
 			$obj.append(createInspectButton(item_name));
 
-			if($('b', $obj).length > 0) {
+			if($j('b', $obj).length > 0) {
 				bold_item = true;
 			}
 		}
@@ -590,7 +599,7 @@ function improveLoot() {
 // -------------- Phrases ---------------------------
 
 function isArena() {
-	return $('#arena_block').length > 0;
+	return $j('#arena_block').length > 0;
 }
 
 function appendCheckbox($div, id, label) {
@@ -603,7 +612,7 @@ function generateArenaPhrase() {
 	var keys = ['hit', 'heal', 'pray'];
 	for (i in keys) {
 		var key = keys[i];
-		if ($('#say_' + key).is(':checked')) {
+		if ($j('#say_' + key).is(':checked')) {
 			parts.push(words.randomPhrase(key));
 		}
 	}
@@ -639,7 +648,7 @@ function smartJoin(parts){
 
 function getArenaSayBox() {
 	// TODO: стиль для бокса, чтобы он был по центру
-	var $div = $('<div id="arena_say_box"></div>');
+	var $div = $j('<div id="arena_say_box"></div>');
 
 	appendCheckbox($div, 'say_hit', 'бей');
 	appendCheckbox($div, 'say_heal', 'лечись');
@@ -650,22 +659,22 @@ function getArenaSayBox() {
 }
 
 function improveSayDialog() {
-	if (isAlreadyImproved( $('#aog_box') )) return;
+	if (isAlreadyImproved( $j('#aog_box') )) return;
 
 	// Hide hint
-	$('#aog_hint_label').hide();
+	$j('#aog_hint_label').hide();
 
 	// Add links
-	var $box = $('#hero_actsofgod');
+	var $box = $j('#hero_actsofgod');
 
 	if (isArena()) {
-		$('#god_phrase_form').before(getArenaSayBox());
+		$j('#god_phrase_form').before(getArenaSayBox());
 	} else {
 		addSayPhraseAfterLabel($box, 'Прана', 'жертва', 'sacrifice');
 		addSayPhraseAfterLabel($box, 'Прана', 'ещё', 'pray');
 
 		// Show timeout bar after saying
-		$('#god_phrase_btn').click(function () {timeout_bar.start(); return true;});
+		$j('#god_phrase_btn').click(function () {timeout_bar.start(); words.currentPhrase=""; return true;});
 	}
 
 	// Save stats
@@ -677,10 +686,10 @@ function improveSayDialog() {
 // ----------- Вести с полей ----------------
 function improveFieldBox() {
 	if (isArena()) return;
-	if (isAlreadyImproved( $('#hero_details fieldset') )) return;
+	if (isAlreadyImproved( $j('#hero_details fieldset') )) return;
 
 	// Add links
-	var $box = $('#hero_details');
+	var $box = $j('#hero_details');
 
 	addSayPhraseAfterLabel($box, 'Противник', 'бей', 'hit');
 }
@@ -689,14 +698,14 @@ function improveFieldBox() {
 
 function improveStats() {
 	if (isArena()) {
-        stats.setFromLabelCounter('heal1', $('#hero1_stats'), 'Здоровье');
-        stats.setFromLabelCounter('heal2', $('#hero2_stats'), 'Здоровье');
+        stats.setFromLabelCounter('heal1', $j('#hero1_stats'), 'Здоровье');
+        stats.setFromLabelCounter('heal2', $j('#hero2_stats'), 'Здоровье');
         return;
     }
-	if (isAlreadyImproved( $('#hs_box') )) return;
+	if (isAlreadyImproved( $j('#hs_box') )) return;
 
 	// Add links
-	var $box = $('#hero_stats');
+	var $box = $j('#hero_stats');
 
 	addSayPhraseAfterLabel($box, 'Уровень', 'ещё', 'exp');
 	addSayPhraseAfterLabel($box, 'Здоровье', 'ещё', 'heal');
@@ -712,8 +721,8 @@ function improveStats() {
 		return parseInt(val.replace(/[^0-9]/g, '')) || 0;
 	};
 
-	stats.setFromProgressBar('exp', $('#pr3'));
-	stats.setFromProgressBar('task', $('#pr4'));
+	stats.setFromProgressBar('exp', $j('#pr3'));
+	stats.setFromProgressBar('task', $j('#pr4'));
 	stats.setFromLabelCounter('level', $box, 'Уровень');
 	stats.setFromLabelCounter('inv', $box, 'Инвентарь');
 	var heal  = stats.setFromLabelCounter('heal', $box, 'Здоровье');
@@ -730,10 +739,10 @@ function improveStats() {
 
 function improveEquip() {
 	if (isArena()) return;
-	if (isAlreadyImproved( $('#equipment_box') )) return;
+	if (isAlreadyImproved( $j('#equipment_box') )) return;
 
 	// Save stats
-	var $box = $('#equipment_box');
+	var $box = $j('#equipment_box');
 
 	stats.setFromEquipCounter('equip1', $box, 'Оружие');
 	stats.setFromEquipCounter('equip2', $box, 'Щит');
@@ -748,10 +757,10 @@ function improveEquip() {
 
 function improveMailbox() {
 	if (isArena()) return;
-	if (isAlreadyImproved( $('#recent_friends') )) return;
+	if (isAlreadyImproved( $j('#recent_friends') )) return;
 
 	// Ссылки на информацию о боге по средней кнопке мыши
-	$('#recent_friends .new_line a')
+	$j('#recent_friends .new_line a')
 		.each(function(ind, obj) {
 				  if (obj.innerHTML == 'показать всех знакомых'
 					  || obj.innerHTML.substring(0, 20) == 'скрыть всех знакомых') {
@@ -763,40 +772,40 @@ function improveMailbox() {
 }
 
 function improveInterface(){
-    var $pw = $('div#page_wrapper');
-    var $c = $('div#acc_box div:first');
-    if (localStorage["GM_" + god_name + ":useWideScreen"] == 'true') {
+    var $pw = $j('div#page_wrapper');
+    var $c = $j('div#acc_box div:first');
+    if (localStorage["GM_" + god_name + ":useWideScreen"] == 'true' && $j('body').width() > 1244) {
 //        if ($pw.css('width') == '80%') return;
         $pw.css('width', '80%');
         var wdt = Math.floor(($c.width() - 48) / 6);
         wdt = (wdt - Math.floor(wdt / 2) * 2) == 0 ? wdt - 1 : wdt;
         var wd1 = Math.floor((wdt - 7) / 2);
         var wd2 = Math.floor((wdt - 21) / 4);
-        $('div.field_content:eq(0) span div[class^="acc_"]', $c).width(wdt);
-        $('div.field_content:eq(1) span div[class^="acc_"]', $c).width(wd1);
-        $('div.field_content:eq(2) span div[class^="acc_"]', $c).width(wd2);
+        $j('div.field_content:eq(0) span div[class^="acc_"]', $c).width(wdt);
+        $j('div.field_content:eq(1) span div[class^="acc_"]', $c).width(wd1);
+        $j('div.field_content:eq(2) span div[class^="acc_"]', $c).width(wd2);
     }else{
         if ($pw.css('width') == '80%') {
             $pw.css('width', '995px');
-            $('div.field_content:eq(0) span div[class^="acc_"]', $c).width(57);
-            $('div.field_content:eq(1) span div[class^="acc_"]', $c).width(25);
-            $('div.field_content:eq(2) span div[class^="acc_"]', $c).width(9);
+            $j('div.field_content:eq(0) span div[class^="acc_"]', $c).width(57);
+            $j('div.field_content:eq(1) span div[class^="acc_"]', $c).width(25);
+            $j('div.field_content:eq(2) span div[class^="acc_"]', $c).width(9);
         }
     }
     if (localStorage["GM_" + god_name + ":useBackground"] == 'true') {
-        if ($('div#hero_background').length == 0) {
+        if ($j('div#hero_background').length == 0) {
             var imgURL = chrome.extension.getURL("background_default.jpg");
-            var $bkg = $('<div id=hero_background>').css({'background-image' : 'url(' + imgURL + ')', 'background-repeat' : 'repeat',
+            var $bkg = $j('<div id=hero_background>').css({'background-image' : 'url(' + imgURL + ')', 'background-repeat' : 'repeat',
                 'position' : 'fixed', 'width' : '100%', 'height' : '100%', 'z-index' : '1'});
-            $('body').prepend($bkg);
+            $j('body').prepend($bkg);
             $pw.css({'z-index': 2, 'position': 'relative'});
-            //    $('body').css({'background-image' : 'url(' + imgURL + ')', 'background-repeat' : 'repeat'});
-            $('div[id$="_block"]').css('background', 'none repeat scroll 0% 0% transparent');
+            //    $j('body').css({'background-image' : 'url(' + imgURL + ')', 'background-repeat' : 'repeat'});
+            $j('div[id$="_block"]').css('background', 'none repeat scroll 0% 0% transparent');
         }
     }else{
-        if ($('div#hero_background').length > 0) {
-            $('div#hero_background').remove();
-            $('div[id$="_block"]').removeAttr('style');
+        if ($j('div#hero_background').length > 0) {
+            $j('div#hero_background').remove();
+            $j('div[id$="_block"]').removeAttr('style');
             var width = $pw.css('width');
             $pw.removeAttr('style');
             $pw.css('width') = width;
@@ -818,6 +827,7 @@ function improve() {
 		improveMailbox();
         improveInterface();
 		informer.update('pvp', isArena());
+        words.checkCurrentPhrase();
 	} catch (x) {
 		GM_log(x);
 	} finally {
@@ -836,8 +846,8 @@ function improve() {
 	  improve();
 
 	  // event listeners
-	  $(document).bind("DOMNodeInserted", function () {
+	  $j(document).bind("DOMNodeInserted", function () {
 						   if(!ImproveInProcess)
 							   setTimeout(improve, 1);
 					   });
-	  $('body').hover( function() { logger.update(); } );
+	  $j('body').hover( function() { logger.update(); } );
