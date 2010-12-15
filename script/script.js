@@ -1,8 +1,4 @@
 var $j = jQuery.noConflict();
-var version = 2;
-var script_link = 'http://userscripts.org/scripts/show/81101';
-var latest_version_link = 'http://github.com/Ryoko/godville-ui/raw/master/version';
-var source_link_template = 'http://github.com/Ryoko/godville-ui/raw/%tag%/godville-ui.user.js';
 
 var god_name = isArena() ?
         $j.trim($j('div#hero1_info fieldset div div a[href*="/gods/"]').text()):
@@ -117,7 +113,7 @@ var menu_bar = {
 		this.bar.toggle(storage.get('ui_menu_visible') == 'true' || false);
 		//append basic elems
         ///TODO: auto change version number
-		this.append($j('<strong>Godville UI (v.0.2.3):</strong>'));
+		this.append($j('<strong>Godville UI (v.0.2.4):</strong>'));
 		this.append(this.reformalLink);
 		if (is_developer()) {
 			this.append(this.getDumpButton());
@@ -148,14 +144,14 @@ var menu_bar = {
 // storage.set_with_diff -- store value and get diff with old
 var storage = {
 	_get_key: function(key) {
-		return god_name + ':' + key;
+		return "GM_" + god_name + ':' + key;
 	},
 	set: function(id, value) {
-		GM_setValue(this._get_key(id), value);
+		localStorage.setItem(this._get_key(id), value);
 		return value;
 	},
 	get: function(id) {
-		return GM_getValue(this._get_key(id), null);
+		return localStorage.getItem(this._get_key(id));
 	},
 	diff: function(id, value) {
 		var diff = null;
@@ -172,9 +168,9 @@ var storage = {
 	},
 	dump: function() {
 		var lines = new Array;
-//		for each (val in GM_listValues().sort()) {
-//			lines.push(val + ' = ' + GM_getValue(val, 'UNDEF'));
-//		}
+        for(var i = 0; i < localStorage.length; i++){
+			lines.push(localStorage[i] + " = " + localStorage[localStorage[i]]);
+		}
 		GM_log("Storage:\n" + lines.join("\n"));
 	}
 };
@@ -182,32 +178,16 @@ var storage = {
 var words = {
     currentPhrase: "",
 	init: function() {
-		// JSON.parse не поддерживает комментарии в JSON. Whyyyyy ???
-		// пришлось использовать небезопасный eval.
-		// TODO: JSON.minify? yaml? -- и для того и другого нужна еще одна библиотечка
-//        this.waitResponce();
         this.base = getWords();
         var sects = ['heal', 'pray', 'sacrifice', 'exp', 'gold', 'hit', 'do_task', 'cancel_task', 'die', 'town', 'heil'];
         for (var i = 0; i < sects.length; i++){
             var t = sects[i];
-            var text = localStorage["GM_" + god_name + ":phrases_" + t];
+            var text = storage.get('phrases_' + t);
 //            var text_list = god_name (this.response) ? this.response['phrases'][t] : [];
             if (text && text != ""){
                 this.base['phrases'][t] = text.split("||");
             }
          }
-		this.version = this.base['version'];
-
-		// Проверка версии
-		if (this.version > version) {
-			alert("Внимание! Вы используете новый phrases.json со старым скриптом!\n\n"
-				  + ' - попробуйте обновить скрипт: ' + script_link + "\n"
-				  + '(предварительно сохраните новый phrases.json, не зря же вы его вручную ставили)');
-		} else if (this.version < version) {
-			alert("Внимание! Вы используете старый phrases.json с новым скриптом\n\n"
-				  + " - попробуйте переустановить скрипт: " + script_link + "\n"
-				  + " - или, если Вы изменяли phrases.json, и сейчас используете его, вручную найти что изменилось и поправить");
-		}
 	},
 	// Phrase gen
     randomPhrase: function(sect) {
@@ -217,7 +197,7 @@ var words = {
     longPhrase: function(sect, len) {
         var prefix = this._addHeroName(this._addHeil(''));
         var phrases;
-        if (localStorage["GM_" + god_name + ":useShortPhrases"] == "true") {
+        if (storage.get('useShortPhrases') == "true") {
             phrases = [getRandomItem(this.base['phrases'][sect])];
         }else{
             phrases = this._longPhrase_recursion(this.base['phrases'][sect].slice(), (len || 78) - prefix.length);
@@ -250,12 +230,12 @@ var words = {
     },
 
     _addHeroName: function(text){
-        if ((localStorage["GM_" + god_name + ":useHeroName"] != 'true')) return text;
+        if ((storage.get('useHeroName') != 'true')) return text;
         return char_name + ', ' + this._changeFirstLetter(text);
     },
 
     _addHeil: function(text){
-        if ((localStorage["GM_" + god_name + ":useHeil"] != 'true')) return text;
+        if ((storage.get('useHeil') != 'true')) return text;
         return getRandomItem(this.base['phrases']['heil']) + ', ' + this._changeFirstLetter(text);
     },
 
@@ -289,9 +269,9 @@ var stats = {
 		return storage.set('stats_' + key, value);
 	},
 	setFromProgressBar: function(id, $elem) {
-		value = 100 - $elem.css('width').replace(/%/, '');
+		var value = 100 - $elem.css('width').replace(/%/, '');
 		// Workaround for bug with decreasing 'exp'
-		old_value = this.get(id);
+		var old_value = this.get(id);
 		if (old_value) {
 			var diff = value - old_value;
 			if (diff < 0 && diff > -1)
@@ -349,7 +329,7 @@ var logger = {
 		if(diff) {
 			// Округление и добавление плюсика
 			diff = Math.round(diff * 1000) / 1000;
-			s = (diff < 0)? diff : '+' + diff;
+			var s = (diff < 0)? diff : '+' + diff;
 
 			this.appendStr(id, klass, name  + s, descr);
 		}
@@ -358,8 +338,8 @@ var logger = {
 	update: function() {
 		this.need_separator = true;
         if (isArena()){
-            this.watchStatsValue('heal1', 'hero:hp', 'Здоровье героя', heal);
-            this.watchStatsValue('heal2', 'enemy:hp', 'Здоровье соперника', death);
+            this.watchStatsValue('heal1', 'hero:hp', 'Здоровье героя', 'heal');
+            this.watchStatsValue('heal2', 'enemy:hp', 'Здоровье соперника', 'death');
         }
 		this.watchStatsValue('prana', 'pr', 'Прана (проценты)');
 		this.watchStatsValue('exp', 'exp', 'Опыт (проценты)');
@@ -382,56 +362,6 @@ var logger = {
 };
 
 // ------------------------------------
-// Updater
-// ------------------------------------
-var updater = {
-	interval: 60 * 60 * 1000,  // every hour
-	//interval: 5 // every reload
-
-	queryVersion: function() {
-		// jQuery.ajax не работает, потому что ссылка version_link
-		// указывает на другой домен. Защита ...
-		GM_xmlhttpRequest(
-			{
-				method:"GET",
-				url:latest_version_link,
-				onload:function(details) {
-					var data = details.responseText;
-					storage.set('updater_available', data);
-					updater.insertLink();
-				}
-			});
-	},
-	getUpdateLink: function(label, version) {
-		var link = source_link_template.replace(/%tag%/, 'v' + version);
-		return $j('<a id="update" href="' + link + '">' + label + '</a>');
-	},
-	insertLink: function() {
-		var installed = GM_getResourceText('Version');
-		var available = storage.get('updater_available');
-
-		if (installed != available) {
-			menu_bar.append(this.getUpdateLink('<strong>обновить</strong>', available));
-			menu_bar.show();
-		} else {
-			menu_bar.append(this.getUpdateLink('переустановить', installed));
-		}
-	},
-	check: function() {
-  		var timer_key = 'update_timer';
-		var date = new Date;
-		var secs = date.getTime();
-		var diff = storage.diff(timer_key, secs);
-		if ( !diff || diff > this.interval) {
-			storage.set(timer_key, secs);
-			this.queryVersion();
-		} else {
-			this.insertLink();
-		}
-	}
-};
-
-// ------------------------------------
 // Информаер для важной информации
 // * мигает заголовком
 // * показывает попапы
@@ -445,7 +375,7 @@ var informer = {
 
 		// load and draw labels
 		this.load();
-		for (flag in this.flags) {
+		for (var flag in this.flags) {
 			if (this.flags[flag])
 				this.create_label(flag);
 		}
@@ -504,7 +434,7 @@ var informer = {
 	tick: function() {
 		// пройти по всем флагам и выбрать те, которые надо показывать
 		var to_show = [];
-		for (flag in this.flags) {
+		for (var flag in this.flags) {
 			if (this.flags[flag])
 				to_show.push(flag);
 		}
@@ -610,7 +540,7 @@ function appendCheckbox($div, id, label) {
 function generateArenaPhrase() {
 	var parts = [];
 	var keys = ['hit', 'heal', 'pray'];
-	for (i in keys) {
+	for (var i in keys) {
 		var key = keys[i];
 		if ($j('#say_' + key).is(':checked')) {
 			parts.push(words.randomPhrase(key));
@@ -774,7 +704,7 @@ function improveMailbox() {
 function improveInterface(){
     var $pw = $j('div#page_wrapper');
     var $c = $j('div#acc_box div:first');
-    if (localStorage["GM_" + god_name + ":useWideScreen"] == 'true' && $j('body').width() > 1244) {
+    if (storage.get('useWideScreen') == 'true' && $j('body').width() > 1244) {
 //        if ($pw.css('width') == '80%') return;
         $pw.css('width', '80%');
         var wdt = Math.floor(($c.width() - 48) / 6);
@@ -792,7 +722,7 @@ function improveInterface(){
             $j('div.field_content:eq(2) span div[class^="acc_"]', $c).width(9);
         }
     }
-    if (localStorage["GM_" + god_name + ":useBackground"] == 'true') {
+    if (storage.get('useBackground') == 'true') {
         if ($j('div#hero_background').length == 0) {
             var imgURL = chrome.extension.getURL("background_default.jpg");
             var $bkg = $j('<div id=hero_background>').css({'background-image' : 'url(' + imgURL + ')', 'background-repeat' : 'repeat',
