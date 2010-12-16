@@ -151,7 +151,9 @@ var storage = {
 		return value;
 	},
 	get: function(id) {
-		return localStorage.getItem(this._get_key(id));
+        var val = localStorage.getItem(this._get_key(id));
+        if (val) val = val.replace(/^[NSB]\]/, '');
+        return val;
 	},
 	diff: function(id, value) {
 		var diff = null;
@@ -169,10 +171,24 @@ var storage = {
 	dump: function() {
 		var lines = new Array;
         for(var i = 0; i < localStorage.length; i++){
-			lines.push(localStorage[i] + " = " + localStorage[localStorage[i]]);
+			lines.push(localStorage.key(i) + " = " + localStorage[localStorage.key(i)]);
 		}
 		GM_log("Storage:\n" + lines.join("\n"));
-	}
+	},
+    clearStorage: function(){
+        if (this.get('clean161210') != 'true'){
+            var idx_lst = [];
+            var r = new RegExp('(^GM_:)|(^GM_.{5,40}'+god_name+'[!?\\.]?:)');
+            for(var i = 0; i < localStorage.length; i++){
+                var key = localStorage.key(i);
+                if (key.match(r)) idx_lst.push(key);
+             }
+            for(key in idx_lst){
+                localStorage.removeItem(idx_lst[key]);
+            }
+            this.set('clean161210', true);
+        }
+    }
 };
 
 var words = {
@@ -409,7 +425,9 @@ var informer = {
 	},
 	// PRIVATE
 	load: function() {
-		this.flags = JSON.parse(storage.get('informer_flags') || '{}');
+        var fl = storage.get('informer_flags');
+        if (!fl || fl == "") fl = '{}';
+		this.flags = JSON.parse(fl);
 	},
 	save: function() {
 		storage.set('informer_flags', JSON.stringify(this.flags));
@@ -741,7 +759,14 @@ function improveInterface(){
             $pw.css('width') = width;
          }
     }
+}
 
+function add_css(){
+    if ($j('#ui_css').length == 0){
+        var url = chrome.extension.getURL("godville-ui.css");
+        GM_addGlobalStyleURL(url, 'ui_css');
+//        $j('<link id="ui_css" href="'+url+'" media="screen" rel="stylesheet" type="text/css">').appendTo($j('head'));
+    }
 }
 
 // -------- do all improvements ----------
@@ -766,18 +791,20 @@ function improve() {
 }
 
 // Main code
-	  words.init();
-	  logger.create();
-	  timeout_bar.create();
-	  menu_bar.create();
+add_css();
+storage.clearStorage();
+words.init();
+logger.create();
+timeout_bar.create();
+menu_bar.create();
 //	  updater.check();
-	  informer.init();
+informer.init();
 
-	  improve();
+improve();
 
-	  // event listeners
-	  $j(document).bind("DOMNodeInserted", function () {
-						   if(!ImproveInProcess)
-							   setTimeout(improve, 1);
-					   });
-	  $j('body').hover( function() { logger.update(); } );
+// event listeners
+$j(document).bind("DOMNodeInserted", function () {
+                   if(!ImproveInProcess)
+                       setTimeout(improve, 1);
+               });
+$j('body').hover( function() { logger.update(); } );

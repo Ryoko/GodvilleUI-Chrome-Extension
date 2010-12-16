@@ -1,8 +1,7 @@
 {
    "content_scripts": [ {
       "js": [ "gm_func.js", "jquerymin.js", "phrases.js", "script.js" ],
-      "css": [ "godville-ui.css" ],
-      "matches": [  "http://godville.net/hero*" ]
+      "matches": [  "http://godville.net/hero*", "file:///D:/work/Godville_page_pvp/*" ]
    },
    {
        "js": [ "jquerymin.js", "phrases.js", "options-page.js", "options.js" ],

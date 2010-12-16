@@ -10,6 +10,14 @@ function GM_ApiBrowserCheck() {
     if(hel && hel.nodeName=='HEAD') { hel.appendChild(sel); } else { document.body.insertBefore(sel,document.body.firstChild); }
     return sel;
   }
+  GM_addGlobalStyleURL=function(url, id) { // Redefine GM_addGlobalStyle with a better routine
+      var sel=document.createElement('link'); sel.setAttribute('type','text/css'); sel.setAttribute('href',url);
+      sel.setAttribute('media', 'screen'); sel.setAttribute('rel', 'stylesheet');
+      if (id) sel.setAttribute('id', id);
+      var hel=document.documentElement.firstChild; while(hel && hel.nodeName!='HEAD') { hel=hel.nextSibling; }
+      if(hel && hel.nodeName=='HEAD') { hel.appendChild(sel); } else { document.body.insertBefore(sel,document.body.firstChild); }
+      return sel;
+  }
   var needApiUpgrade=false;
   if(window.navigator.appName.match(/^opera/i) && typeof(window.opera)!='undefined') {
     needApiUpgrade=true; gvar.isOpera=true; GM_log=window.opera.postError; GM_log('Opera detected...');
