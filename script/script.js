@@ -3,7 +3,7 @@ var $j = jQuery.noConflict();
 var god_name = decodeURI(isArena() ?
         $j.trim($j('div#hero1_info fieldset div div a[href*="/gods/"]').text()):
         $j.trim($j('div#hi_box div a[href*="/gods/"]').attr('href').replace('/gods/', '')));
-var developers = ['Neniu', 'Ryoko'];
+var developers = ['Neniu', 'Ryoko', 'Опытный Кролик'];
 var char_name = decodeURI(isArena() ?
         $j.trim($j('div#hero1_info fieldset div:first div').text()):
         $j('div#hi_box div a[href^="/gods/"]').text());
