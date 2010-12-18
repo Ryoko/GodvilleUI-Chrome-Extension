@@ -8,7 +8,6 @@ var char_name = decodeURI(isArena() ?
         $j.trim($j('div#hero1_info fieldset div:first div').text()):
         $j('div#hi_box div a[href^="/gods/"]').text());
 // Style
-//GM_addStyle('Style');
 
 // ------------------------
 //      HELPERS
@@ -113,7 +112,7 @@ var menu_bar = {
 		this.bar.toggle(storage.get('ui_menu_visible') == 'true' || false);
 		//append basic elems
         ///TODO: auto change version number
-		this.append($j('<strong>Godville UI (v.0.2.6):</strong>'));
+		this.append($j('<strong>Godville UI (v.0.2.9):</strong>'));
 		this.append(this.reformalLink);
 		if (is_developer()) {
 			this.append(this.getDumpButton());
@@ -170,12 +169,15 @@ var storage = {
 	},
 	dump: function() {
 		var lines = new Array;
+        var r = new RegExp('^GM_'+god_name+':|GM_options');
         for(var i = 0; i < localStorage.length; i++){
+            if (!localStorage.key(i).match(r)) continue;
 			lines.push(localStorage.key(i) + " = " + localStorage[localStorage.key(i)]);
 		}
 		GM_log("Storage:\n" + lines.join("\n"));
 	},
     clearStorage: function(){
+        this.set('isStorage', 1);
         if (this.get('clean161210') != 'true'){
             var idx_lst = [];
             var r = new RegExp('(^GM_:)|(^GM_.{5,40}'+god_name+'[!?\\.]?:)');
@@ -285,7 +287,7 @@ var stats = {
 		return storage.set('stats_' + key, value);
 	},
 	setFromProgressBar: function(id, $elem) {
-		var value = 100 - $elem.css('width').replace(/%/, '');
+		var value = $elem.attr('title').replace(/%/, '');
 		// Workaround for bug with decreasing 'exp'
 		var old_value = this.get(id);
 		if (old_value) {
@@ -558,14 +560,12 @@ function appendCheckbox($div, id, label) {
 function generateArenaPhrase() {
 	var parts = [];
 	var keys = ['hit', 'heal', 'pray'];
-	for (var i in keys) {
+	for (var i = 0; i < keys.length; i++) {
 		var key = keys[i];
 		if ($j('#say_' + key).is(':checked')) {
 			parts.push(words.randomPhrase(key));
 		}
 	}
-	// TODO: shuffle parts
-	// TODO: smart join: .... , .... и ....
     parts = shuffleArray(parts);
 	var msg = words.getPhrasePrefixed(smartJoin(parts));
 	if(msg.length < 80) {
@@ -669,8 +669,8 @@ function improveStats() {
 		return parseInt(val.replace(/[^0-9]/g, '')) || 0;
 	};
 
-	stats.setFromProgressBar('exp', $j('#pr3'));
-	stats.setFromProgressBar('task', $j('#pr4'));
+	stats.setFromProgressBar('exp', $j('#bar_pr3'));
+	stats.setFromProgressBar('task', $j('#bar_pr4'));
 	stats.setFromLabelCounter('level', $box, 'Уровень');
 	stats.setFromLabelCounter('inv', $box, 'Инвентарь');
 	var heal  = stats.setFromLabelCounter('heal', $box, 'Здоровье');
@@ -706,7 +706,6 @@ function improveEquip() {
 function improveMailbox() {
 	if (isArena()) return;
 	if (isAlreadyImproved( $j('#recent_friends') )) return;
-
 	// Ссылки на информацию о боге по средней кнопке мыши
 	$j('#recent_friends .new_line a')
 		.each(function(ind, obj) {
@@ -717,6 +716,44 @@ function improveMailbox() {
 				  obj.href = "http://godville.net/gods/"+obj.innerHTML;
 			  });
 
+}
+
+function improvePanteons(){
+	if (isArena()) return;
+    var $low_to_arena = $j('#aog_box #to_arena_link');
+    var $hi_to_arena = $j('#pantheon_box #hi_to_arena_link');
+    var $box = $j('#hero_pantheon');
+    if (storage.get('useRelocateArena') == 'true'){
+        if ($hi_to_arena.length == 0 && $low_to_arena.length > 0){
+            $hi_to_arena = $j('<span id="hi_to_arena_link"></span>');
+            addAfterLabel($box, ' Гладиаторства', $hi_to_arena);
+            $hi_to_arena = $j('#hi_to_arena_link');
+        }
+        if($low_to_arena.length > 0){
+            $hi_to_arena.html($low_to_arena.html());
+            if ($j('a', $hi_to_arena).length > 0) $j('a', $hi_to_arena).text('Арена');
+            else $hi_to_arena.text('Арена');
+            $hi_to_arena.show();
+            $low_to_arena.hide();
+        }
+    }else{
+        if ($low_to_arena.length == 0 && $hi_to_arena.length > 0){
+            $j('<div><span id="to_arena_link"></span></div>').insertAfter($j('#punish_link'));
+            $low_to_arena = $j('#to_arena_link');
+            $low_to_arena.html($hi_to_arena.html());
+            if ($j('a', $low_to_arena).length > 0) $j('a', $low_to_arena).text('Отправить на арену');
+            else $low_to_arena.text('Отправить на арену');
+        }
+        $hi_to_arena.hide();
+        $low_to_arena.show();
+    }
+
+    if (isAlreadyImproved( $j('#hero_pantheon') )) return;
+    var guild = $j('#hi_box div div i a[href^="http://wiki.godville.net/index.php/"]').text();
+    if (guild){
+        var $gstat = $j('<span id="guild_stat"><a href="http://thedragons.ru/clans/' + encodeURI(guild) + '" onclick="window.open(this.href);return false;" title="Статистика по гильдии">стат.</a></span>');
+        addAfterLabel($box, ' Солидарности', $gstat);
+    }
 }
 
 function improveInterface(){
@@ -742,7 +779,7 @@ function improveInterface(){
     }
     if (storage.get('useBackground') == 'true') {
         if ($j('div#hero_background').length == 0) {
-            var imgURL = chrome.extension.getURL("background_default.jpg");
+            var imgURL = GM_getResource("background_default.jpg");
             var $bkg = $j('<div id=hero_background>').css({'background-image' : 'url(' + imgURL + ')', 'background-repeat' : 'repeat',
                 'position' : 'fixed', 'width' : '100%', 'height' : '100%', 'z-index' : '1'});
             $j('body').prepend($bkg);
@@ -763,9 +800,7 @@ function improveInterface(){
 
 function add_css(){
     if ($j('#ui_css').length == 0){
-        var url = chrome.extension.getURL("godville-ui.css");
-        GM_addGlobalStyleURL(url, 'ui_css');
-//        $j('<link id="ui_css" href="'+url+'" media="screen" rel="stylesheet" type="text/css">').appendTo($j('head'));
+        GM_addGlobalStyleURL('godville-ui.css', 'ui_css');
     }
 }
 
@@ -774,14 +809,16 @@ var ImproveInProcess = false;
 function improve() {
 	ImproveInProcess = true;
 	try {
+        informer.update('pvp', isArena());
+        if (!storage.get('isStorage')) throw('No users data!');
+        improveInterface();
 		improveLoot();
 		improveSayDialog();
 		improveStats();
 		improveFieldBox();
 		improveEquip();
 		improveMailbox();
-        improveInterface();
-		informer.update('pvp', isArena());
+        improvePanteons();
         words.checkCurrentPhrase();
 	} catch (x) {
 		GM_log(x);
@@ -797,7 +834,6 @@ words.init();
 logger.create();
 timeout_bar.create();
 menu_bar.create();
-//	  updater.check();
 informer.init();
 
 improve();

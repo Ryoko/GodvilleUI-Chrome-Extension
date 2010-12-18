@@ -1,4 +1,4 @@
-var gvar=function() {} // Global variables
+var gvar=function() {}; // Global variables
 function GM_ApiBrowserCheck() {
   const GMSTORAGE_PATH = 'GM_'; // You can change it to avoid conflict with others scripts
   if(typeof(unsafeWindow)=='undefined') { unsafeWindow=window; }
@@ -9,9 +9,11 @@ function GM_ApiBrowserCheck() {
     var hel=document.documentElement.firstChild; while(hel && hel.nodeName!='HEAD') { hel=hel.nextSibling; }
     if(hel && hel.nodeName=='HEAD') { hel.appendChild(sel); } else { document.body.insertBefore(sel,document.body.firstChild); }
     return sel;
-  }
+  };
+  GM_getResource=function(res){ return chrome.extension.getURL(res) };
   GM_addGlobalStyleURL=function(url, id) { // Redefine GM_addGlobalStyle with a better routine
-      var sel=document.createElement('link'); sel.setAttribute('type','text/css'); sel.setAttribute('href',url);
+      var uri=chrome.extension.getURL(url);
+      var sel=document.createElement('link'); sel.setAttribute('type','text/css'); sel.setAttribute('href',uri);
       sel.setAttribute('media', 'screen'); sel.setAttribute('rel', 'stylesheet');
       if (id) sel.setAttribute('id', id);
       var hel=document.documentElement.firstChild; while(hel && hel.nodeName!='HEAD') { hel=hel.nextSibling; }
