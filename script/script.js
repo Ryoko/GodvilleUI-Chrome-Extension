@@ -122,7 +122,7 @@ var ui_menu_bar = {
 		this.bar.toggle(ui_storage.get('ui_menu_visible') == 'true' || false);
 		//append basic elems
         ///TODO: auto change version number
-		this.append($j('<strong>Godville UI (v.0.2.11):</strong>'));
+		this.append($j('<strong>Godville UI (v.0.2.12):</strong>'));
 		this.append(this.reformalLink);
 		if (ui_utils.is_developer()) {
 			this.append(this.getDumpButton());
@@ -698,7 +698,7 @@ var ui_improver = {
         ui_utils.addSayPhraseAfterLabel($box, 'Уровень', 'ещё', 'exp');
         ui_utils.addSayPhraseAfterLabel($box, 'Здоровье', 'ещё', 'heal');
         ui_utils.addSayPhraseAfterLabel($box, 'Золота', 'клад', 'gold');
-        //ui_utils.addSayPhraseAfterLabel($box, 'Задание', 'отмена', 'cancel_task');
+        ui_utils.addSayPhraseAfterLabel($box, 'Задание', 'отмена', 'cancel_task');
         ui_utils.addSayPhraseAfterLabel($box, 'Задание', 'ещё', 'do_task');
         //ui_utils.addSayPhraseAfterLabel($box, 'Смертей', 'ещё', 'die');
         ui_utils.addSayPhraseAfterLabel($box, 'Столбов от столицы', 'дом', 'town');
