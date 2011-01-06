@@ -15,7 +15,9 @@ var ui_data = {
             this.god_name = decodeURI($user.attr('href').replace('/gods/', ''));
             this.char_name = $j.trim($user.text());
         }
-    }
+        this.save_phrase = ui_storage.get('store_phrase');
+    },
+    save_phrase : false
 };
 
 // ------------------------
@@ -75,6 +77,10 @@ var ui_utils = {
 	    var res = arr[ind];
 	    arr.splice(ind, 1);
 	    return res;
+    },
+    appendCheckbox : function($div, id, label) {
+        $div.append('<input type="checkbox" id="' + id +  '" >');
+        $div.append('<label for="' + id + '">' + label + '</label>');
     }
 };
 
@@ -122,7 +128,7 @@ var ui_menu_bar = {
 		this.bar.toggle(ui_storage.get('ui_menu_visible') == 'true' || false);
 		//append basic elems
         ///TODO: auto change version number
-		this.append($j('<strong>Godville UI (v.0.2.12):</strong>'));
+		this.append($j('<strong>Godville UI (v.0.2.13):</strong>'));
 		this.append(this.reformalLink);
 		if (ui_utils.is_developer()) {
 			this.append(this.getDumpButton());
@@ -504,10 +510,6 @@ var ui_arena = {
         return $j('#arena_block').length > 0;
     },
 
-    appendCheckbox : function($div, id, label) {
-        $div.append('<input type="checkbox" id="' + id +  '" >');
-        $div.append('<label for="' + id + '">' + label + '</label>');
-    },
     generateArenaPhrase : function() {
         var parts = [];
         var keys = ['hit', 'heal', 'pray'];
@@ -549,9 +551,9 @@ var ui_arena = {
         // TODO: стиль для бокса, чтобы он был по центру
         var $div = $j('<div id="arena_say_box"></div>');
 
-        ui_arena.appendCheckbox($div, 'say_hit', 'бей');
-        ui_arena.appendCheckbox($div, 'say_heal', 'лечись');
-        ui_arena.appendCheckbox($div, 'say_pray', 'молись');
+        ui_utils.appendCheckbox($div, 'say_hit', 'бей');
+        ui_utils.appendCheckbox($div, 'say_heal', 'лечись');
+        ui_utils.appendCheckbox($div, 'say_pray', 'молись');
 
         $div.click(function() { ui_utils.sayToHero(ui_arena.generateArenaPhrase());});
         return $div;
@@ -654,7 +656,7 @@ var ui_improver = {
 
         // Add links
         var $box = $j('#hero_actsofgod');
-
+        var $button = $j('#god_phrase_btn');
         if (this.isArena) {
             $j('#god_phrase_form').before(ui_arena.getArenaSayBox());
         } else {
@@ -662,7 +664,31 @@ var ui_improver = {
             ui_utils.addSayPhraseAfterLabel($box, 'Прана', 'ещё', 'pray');
 
             // Show timeout bar after saying
-            $j('#god_phrase_btn').click(function () {ui_timeout_bar.start(); ui_words.currentPhrase=""; return true;});
+            ui_utils.appendCheckbox($j('#god_phrase_form form div>div', $box), "ui_store_phrase", "Запомнить глас");
+            if (ui_data.save_phrase) $j('#ui_store_phrase', $box).attr('checked', 'checked');
+            $j('#ui_store_phrase', $box).click(function() {
+                ui_data.save_phrase = $j('#ui_store_phrase', $box).attr('checked');
+                ui_storage.set('store_phrase', ui_data.save_phrase);
+            });
+            $button.click(function () {
+                ui_timeout_bar.start();
+                if (ui_data.save_phrase)
+                    ui_improver.savePhrase();
+                else
+                    ui_words.currentPhrase="";
+                return true;
+            });
+            var $god_phrase = $j('#god_phrase', $box);
+            $god_phrase.keyup(function () {
+                ui_improver.savePhrase();
+            });
+            $god_phrase.change(function () {
+                ui_improver.savePhrase();
+            });
+            $god_phrase.click(function () {
+                ui_improver.savePhrase();
+            });
+            
         }
 
         // Save stats
@@ -670,7 +696,9 @@ var ui_improver = {
 
         ui_informer.update('pr = 100', prana == 100);
     },
-
+    savePhrase: function(){
+        ui_words.currentPhrase = $j('#god_phrase').val();
+    },
 // ----------- Вести с полей ----------------
     improveFieldBox : function() {
         if (this.isArena) return;
